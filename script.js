@@ -54,6 +54,38 @@ canvas.addEventListener('mouseleave', () => {
     ctx.closePath();
 });
 
+// ====== タッチイベントリスナー (ここから追加・修正) ======
+
+canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault(); // スクロールなどのデフォルト動作を防止
+    isDrawing = true;
+    const touch = e.touches[0]; // 最初の指の情報を取得
+    ctx.beginPath();
+    // touch.clientX/Y はビューポート基準なので、canvas.getBoundingClientRect() でcanvas内の座標に変換
+    const rect = canvas.getBoundingClientRect();
+    ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+}, false); // passive: false を指定して preventDefault を許可
+
+canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault(); // スクロールなどのデフォルト動作を防止
+    if (isDrawing) {
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+        ctx.stroke();
+    }
+}, false); // passive: false を指定して preventDefault を許可
+
+canvas.addEventListener('touchend', () => {
+    isDrawing = false;
+    ctx.closePath();
+});
+
+canvas.addEventListener('touchcancel', () => { // 予期せぬ中断（例: 電話着信）に対応
+    isDrawing = false;
+    ctx.closePath();
+});
+
 clearButton.addEventListener('click', clearCanvas);
 
 // ====== ONNXモデルと正規化パラメータの読み込み ======
